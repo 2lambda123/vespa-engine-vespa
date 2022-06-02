@@ -6,14 +6,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.yahoo.searchlib.rankingexpression.ExpressionFunction;
 import com.yahoo.searchlib.rankingexpression.evaluation.ContextIndex;
-import com.yahoo.searchlib.rankingexpression.evaluation.DoubleValue;
 import com.yahoo.searchlib.rankingexpression.evaluation.ExpressionOptimizer;
-import com.yahoo.searchlib.rankingexpression.evaluation.Value;
 import com.yahoo.tensor.TensorType;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -183,9 +182,7 @@ public class Model {
      */
     public FunctionEvaluator evaluatorOf(String ... names) {  // TODO: Parameter overloading?
         if (names.length == 0) {
-            if (functions.size() > 1)
-                throwUndeterminedFunction("More than one function is available in " + this + ", but no name is given");
-            return evaluatorOf(functions.get(0));
+            return evaluatorOf(functions);
         }
         else if (names.length == 1) {
             String name = names[0];
@@ -230,6 +227,15 @@ public class Model {
     /** Returns a single-use evaluator of a function */
     private FunctionEvaluator evaluatorOf(ExpressionFunction function) {
         return new FunctionEvaluator(function, requireContextPrototype(function.getName()).copy());
+    }
+
+    /** Returns a single-use evaluator of a function */
+    private FunctionEvaluator evaluatorOf(List<ExpressionFunction> functions) {
+        Map<String, LazyArrayContext> contexts = new HashMap<>();
+        for (ExpressionFunction function : functions) {
+            contexts.put(function.getName(), requireContextPrototype(function.getName()).copy());
+        }
+        return new FunctionEvaluator(functions, contexts);
     }
 
     private void throwUndeterminedFunction(String message) {

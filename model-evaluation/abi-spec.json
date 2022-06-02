@@ -6,6 +6,7 @@
       "public"
     ],
     "methods": [
+      "public com.yahoo.tensor.Tensor result(java.lang.String)",
       "public ai.vespa.models.evaluation.FunctionEvaluator bind(java.lang.String, com.yahoo.tensor.Tensor)",
       "public ai.vespa.models.evaluation.FunctionEvaluator bind(java.lang.String, double)",
       "public ai.vespa.models.evaluation.FunctionEvaluator bind(java.lang.String, java.lang.String)",
@@ -13,7 +14,8 @@
       "public ai.vespa.models.evaluation.FunctionEvaluator setMissingValue(double)",
       "public com.yahoo.tensor.Tensor evaluate()",
       "public com.yahoo.searchlib.rankingexpression.ExpressionFunction function()",
-      "public ai.vespa.models.evaluation.LazyArrayContext context()"
+      "public ai.vespa.models.evaluation.LazyArrayContext context()",
+      "public java.util.List outputs()"
     ],
     "fields": []
   },
