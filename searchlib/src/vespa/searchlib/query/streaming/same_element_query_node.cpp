@@ -6,7 +6,7 @@
 namespace search::streaming {
 
 bool
-SameElementQueryNode::evaluate() const {
+SameElementQueryNode::evaluate() {
     HitList hl;
     return ! evaluateHits(hl).empty();
 }
@@ -18,7 +18,7 @@ SameElementQueryNode::addChild(QueryNode::UP child) {
 }
 
 const HitList &
-SameElementQueryNode::evaluateHits(HitList & hl) const
+SameElementQueryNode::evaluateHits(HitList & hl)
 {
     hl.clear();
     if ( !AndQueryNode::evaluate()) return hl;
@@ -28,10 +28,10 @@ SameElementQueryNode::evaluateHits(HitList & hl) const
     unsigned int numFields = children.size();
     unsigned int currMatchCount = 0;
     std::vector<unsigned int> indexVector(numFields, 0);
-    auto curr = static_cast<const QueryTerm *> (children[currMatchCount].get());
+    auto curr = static_cast<QueryTerm *> (children[currMatchCount].get());
     bool exhausted( curr->evaluateHits(tmpHL).empty());
     for (; !exhausted; ) {
-        auto next = static_cast<const QueryTerm *>(children[currMatchCount+1].get());
+        auto next = static_cast<QueryTerm *>(children[currMatchCount+1].get());
         unsigned int & currIndex = indexVector[currMatchCount];
         unsigned int & nextIndex = indexVector[currMatchCount+1];
 
@@ -56,7 +56,7 @@ SameElementQueryNode::evaluateHits(HitList & hl) const
             currMatchCount = 0;
             indexVector[currMatchCount]++;
         }
-        curr = static_cast<const QueryTerm *>(children[currMatchCount].get());
+        curr = static_cast<QueryTerm *>(children[currMatchCount].get());
         exhausted = (nextIndex >= nextIndexMax) || (indexVector[currMatchCount] >= curr->evaluateHits(tmpHL).size());
     }
     return hl;

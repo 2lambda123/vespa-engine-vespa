@@ -13,8 +13,8 @@ class SameElementQueryNode : public AndQueryNode
 {
 public:
     SameElementQueryNode() noexcept : AndQueryNode("SAME_ELEMENT") { }
-    bool evaluate() const override;
-    const HitList & evaluateHits(HitList & hl) const override;
+    bool evaluate() override;
+    const HitList & evaluateHits(HitList & hl) override;
     bool isFlattenable(ParseItem::ItemType) const override { return false; }
     void addChild(QueryNode::UP child) override;
 };

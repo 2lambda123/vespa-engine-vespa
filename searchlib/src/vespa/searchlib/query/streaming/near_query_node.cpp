@@ -47,7 +47,7 @@ NearQueryNode::evaluate_helper() const
 }
 
 bool
-NearQueryNode::evaluate() const
+NearQueryNode::evaluate()
 {
     return evaluate_helper<false>();
 }

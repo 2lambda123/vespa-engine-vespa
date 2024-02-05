@@ -31,40 +31,40 @@ namespace {
 struct SubFieldTerm
 {
     vespalib::string _field_name;
-    const QueryTerm* _term;
+    QueryTerm* _term;
 public:
-    SubFieldTerm(vespalib::string field_name, const QueryTerm* term) noexcept
+    SubFieldTerm(vespalib::string field_name, QueryTerm* term) noexcept
         : _field_name(std::move(field_name)),
           _term(term)
     {
     }
     const vespalib::string& get_field_name() const { return _field_name; }
-    const QueryTerm& get_term() const { return *_term; }
+    QueryTerm& get_term() const { return *_term; }
 };
 
 class Matcher
 {
-    std::vector<const SameElementQueryNode*> _same_element_nodes;
+    std::vector<SameElementQueryNode*> _same_element_nodes;
     std::vector<SubFieldTerm> _sub_field_terms;
     vsm::FieldIdTSearcherMap& _field_searcher_map;
     HitList _hit_list;
     std::vector<uint32_t> _elements;
 
-    void select_query_nodes(const MatchingElementsFields& fields, const QueryNode& query_node);
+    void select_query_nodes(const MatchingElementsFields& fields, QueryNode& query_node);
     void add_matching_elements(const vespalib::string& field_name, uint32_t doc_lid, const HitList& hit_list, MatchingElements& matching_elements);
-    void find_matching_elements(const SameElementQueryNode& same_element, uint32_t doc_lid, MatchingElements& matching_elements);
-    void find_matching_elements(const SubFieldTerm& sub_field_term, uint32_t doc_lid, MatchingElements& matching_elements);
+    void find_matching_elements(SameElementQueryNode& same_element, uint32_t doc_lid, MatchingElements& matching_elements);
+    void find_matching_elements(SubFieldTerm& sub_field_term, uint32_t doc_lid, MatchingElements& matching_elements);
 public:
-    Matcher(vsm::FieldIdTSearcherMap& field_searcher_map, const MatchingElementsFields& fields, const Query& query);
+    Matcher(vsm::FieldIdTSearcherMap& field_searcher_map, const MatchingElementsFields& fields, Query& query);
     ~Matcher();
     bool empty() const { return _same_element_nodes.empty() && _sub_field_terms.empty(); }
     void find_matching_elements(const vsm::StorageDocument& doc, uint32_t doc_lid, MatchingElements& matching_elements);
 };
 
 template<typename T>
-const T* as(const QueryNode& query_node) { return dynamic_cast<const T*>(&query_node); }
+T* as(QueryNode& query_node) { return dynamic_cast<T*>(&query_node); }
 
-Matcher::Matcher(FieldIdTSearcherMap& field_searcher_map, const MatchingElementsFields& fields, const Query& query)
+Matcher::Matcher(FieldIdTSearcherMap& field_searcher_map, const MatchingElementsFields& fields, Query& query)
     : _same_element_nodes(),
       _sub_field_terms(),
       _field_searcher_map(field_searcher_map),
@@ -76,7 +76,7 @@ Matcher::Matcher(FieldIdTSearcherMap& field_searcher_map, const MatchingElements
 Matcher::~Matcher() = default;
 
 void
-Matcher::select_query_nodes(const MatchingElementsFields& fields, const QueryNode& query_node)
+Matcher::select_query_nodes(const MatchingElementsFields& fields, QueryNode& query_node)
 {
     if (auto same_element = as<SameElementQueryNode>(query_node)) {
         if (fields.has_field(same_element->getIndex())) {
@@ -121,7 +121,7 @@ Matcher::add_matching_elements(const vespalib::string& field_name, uint32_t doc_
 }
                                
 void
-Matcher::find_matching_elements(const SameElementQueryNode& same_element, uint32_t doc_lid, MatchingElements& matching_elements)
+Matcher::find_matching_elements(SameElementQueryNode& same_element, uint32_t doc_lid, MatchingElements& matching_elements)
 {
     const HitList& hit_list = same_element.evaluateHits(_hit_list);
     if (!hit_list.empty()) {
@@ -130,7 +130,7 @@ Matcher::find_matching_elements(const SameElementQueryNode& same_element, uint32
 }
 
 void
-Matcher::find_matching_elements(const SubFieldTerm& sub_field_term, uint32_t doc_lid, MatchingElements& matching_elements)
+Matcher::find_matching_elements(SubFieldTerm& sub_field_term, uint32_t doc_lid, MatchingElements& matching_elements)
 {
     const HitList& hit_list = sub_field_term.get_term().evaluateHits(_hit_list);
     if (!hit_list.empty()) {
@@ -144,10 +144,10 @@ Matcher::find_matching_elements(const StorageDocument& doc, uint32_t doc_lid, Ma
     for (vsm::FieldSearcherContainer& fSearch : _field_searcher_map) {
         fSearch->search(doc);
     }
-    for (const auto* same_element : _same_element_nodes) {
+    for (auto* same_element : _same_element_nodes) {
         find_matching_elements(*same_element, doc_lid, matching_elements);
     }
-    for (const auto& term : _sub_field_terms) {
+    for (auto& term : _sub_field_terms) {
         find_matching_elements(term, doc_lid, matching_elements);
     }
 }

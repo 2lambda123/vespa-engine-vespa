@@ -6,7 +6,7 @@
 namespace search::streaming {
 
 bool
-ONearQueryNode::evaluate() const
+ONearQueryNode::evaluate()
 {
     return evaluate_helper<true>();
 }

@@ -15,8 +15,8 @@ class PhraseQueryNode : public MultiTerm
 public:
     PhraseQueryNode(std::unique_ptr<QueryNodeResultBase> result_base, const string& index, uint32_t num_terms);
     ~PhraseQueryNode() override;
-    bool evaluate() const override;
-    const HitList & evaluateHits(HitList & hl) const override;
+    bool evaluate() override;
+    const HitList & evaluateHits(HitList & hl) override;
     void getPhrases(QueryNodeRefList & tl) override;
     void getPhrases(ConstQueryNodeRefList & tl) const override;
     const QueryTerm::FieldInfo & getFieldInfo(size_t fid) const { return _fieldInfo[fid]; }

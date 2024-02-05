@@ -151,9 +151,9 @@ void QueryTerm::getPhrases(QueryNodeRefList & tl)            { (void) tl; }
 void QueryTerm::getPhrases(ConstQueryNodeRefList & tl) const { (void) tl; }
 void QueryTerm::getLeaves(QueryTermList & tl)                { tl.push_back(this); }
 void QueryTerm::getLeaves(ConstQueryTermList & tl)     const { tl.push_back(this); }
-bool QueryTerm::evaluate()                             const { return !_hitList.empty(); }
+bool QueryTerm::evaluate()                                   { return !_hitList.empty(); }
 void QueryTerm::reset()                                      { _hitList.clear(); }
-const HitList & QueryTerm::evaluateHits(HitList &) const { return _hitList; }
+const HitList & QueryTerm::evaluateHits(HitList &) { return _hitList; }
 
 void QueryTerm::resizeFieldId(size_t fieldNo)
 {

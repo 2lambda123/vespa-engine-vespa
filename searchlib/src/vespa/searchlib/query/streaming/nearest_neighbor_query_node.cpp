@@ -22,7 +22,7 @@ NearestNeighborQueryNode::NearestNeighborQueryNode(std::unique_ptr<QueryNodeResu
 NearestNeighborQueryNode::~NearestNeighborQueryNode() = default;
 
 bool
-NearestNeighborQueryNode::evaluate() const
+NearestNeighborQueryNode::evaluate()
 {
     return _distance.has_value();
 }

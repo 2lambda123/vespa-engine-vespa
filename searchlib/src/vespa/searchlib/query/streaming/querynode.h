@@ -40,10 +40,10 @@ class QueryNode
 
   virtual ~QueryNode() = default;
   /// This evalutes if the subtree starting here evaluates to true.
-  virtual bool evaluate() const = 0;
+  virtual bool evaluate() = 0;
   /// This return the hitList for this subtree. Does only give meaning in a
   /// phrase search or any other search that requires position info.
-  virtual const HitList & evaluateHits(HitList & hl) const;
+  virtual const HitList & evaluateHits(HitList & hl);
   /// Clears all the hitlists so the query tree can be reused.
   virtual void reset() = 0;
   /// Gives you all leafs of this tree.

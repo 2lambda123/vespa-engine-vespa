@@ -15,7 +15,7 @@ class QueryConnector : public QueryNode
 public:
     explicit QueryConnector(const char * opName) noexcept;
     ~QueryConnector() override;
-    const HitList & evaluateHits(HitList & hl) const override;
+    const HitList & evaluateHits(HitList & hl) override;
     void reset() override;
     void getLeaves(QueryTermList & tl) override;
     void getLeaves(ConstQueryTermList & tl) const override;
@@ -45,7 +45,7 @@ class TrueNode : public QueryConnector
 {
 public:
     TrueNode() noexcept : QueryConnector("AND") { }
-    bool evaluate() const override;
+    bool evaluate() override;
 };
 
 /** False operator. Matches nothing. */
@@ -53,7 +53,7 @@ class FalseNode : public QueryConnector
 {
 public:
     FalseNode() noexcept : QueryConnector("AND") { }
-    bool evaluate() const override;
+    bool evaluate() override;
 };
 
 /**
@@ -64,7 +64,7 @@ class AndQueryNode : public QueryConnector
 public:
     AndQueryNode() noexcept : QueryConnector("AND") { }
     explicit AndQueryNode(const char * opName) noexcept : QueryConnector(opName) { }
-    bool evaluate() const override;
+    bool evaluate() override;
     bool isFlattenable(ParseItem::ItemType type) const override { return type == ParseItem::ITEM_AND; }
 };
 
@@ -75,7 +75,7 @@ class AndNotQueryNode : public QueryConnector
 {
 public:
     AndNotQueryNode() noexcept : QueryConnector("ANDNOT") { }
-    bool evaluate() const override;
+    bool evaluate() override;
     bool isFlattenable(ParseItem::ItemType) const override { return false; }
 };
 
@@ -87,7 +87,7 @@ class OrQueryNode : public QueryConnector
 public:
     OrQueryNode() noexcept : QueryConnector("OR") { }
     explicit OrQueryNode(const char * opName) noexcept : QueryConnector(opName) { }
-    bool evaluate() const override;
+    bool evaluate() override;
     bool isFlattenable(ParseItem::ItemType type) const override {
         return (type == ParseItem::ITEM_OR) ||
                (type == ParseItem::ITEM_WEAK_AND);
@@ -102,7 +102,7 @@ class RankWithQueryNode : public QueryConnector
 public:
     RankWithQueryNode() noexcept : QueryConnector("RANK") { }
     explicit RankWithQueryNode(const char * opName) noexcept : QueryConnector(opName) { }
-    bool evaluate() const override;
+    bool evaluate() override;
 };
 
 
@@ -113,7 +113,7 @@ class EquivQueryNode : public OrQueryNode
 {
 public:
     EquivQueryNode() noexcept : OrQueryNode("EQUIV") { }
-    bool evaluate() const override;
+    bool evaluate() override;
     bool isFlattenable(ParseItem::ItemType type) const override {
         return (type == ParseItem::ITEM_EQUIV);
     }
@@ -142,7 +142,7 @@ public:
     /// Gives you all phrases of this tree.
     void getPhrases(QueryNodeRefList & tl);
     void getPhrases(ConstQueryNodeRefList & tl) const;
-    bool evaluate() const;
+    bool evaluate();
     size_t depth() const;
     size_t width() const;
     bool valid() const { return _root.get() != nullptr; }

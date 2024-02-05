@@ -15,7 +15,7 @@ PhraseQueryNode::PhraseQueryNode(std::unique_ptr<QueryNodeResultBase> result_bas
 PhraseQueryNode::~PhraseQueryNode() = default;
 
 bool
-PhraseQueryNode::evaluate() const
+PhraseQueryNode::evaluate()
 {
   HitList hl;
   return ! evaluateHits(hl).empty();
@@ -62,7 +62,7 @@ PhraseQueryNode::as_multi_term() noexcept
 }
 
 const HitList &
-PhraseQueryNode::evaluateHits(HitList & hl) const
+PhraseQueryNode::evaluateHits(HitList & hl)
 {
     hl.clear();
     _fieldInfo.clear();

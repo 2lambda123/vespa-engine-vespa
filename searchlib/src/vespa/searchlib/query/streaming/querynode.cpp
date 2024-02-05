@@ -202,7 +202,7 @@ QueryNode::Build(const QueryNode * parent, const QueryNodeResultFactory & factor
     return qn;
 }
 
-const HitList & QueryNode::evaluateHits(HitList & hl) const
+const HitList & QueryNode::evaluateHits(HitList & hl)
 {
     return hl;
 }

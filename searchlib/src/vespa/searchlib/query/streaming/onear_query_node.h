@@ -14,7 +14,7 @@ class ONearQueryNode : public NearQueryNode
 {
 public:
     ONearQueryNode() noexcept : NearQueryNode("ONEAR") { }
-    bool evaluate() const override;
+    bool evaluate() override;
 };
 
 }

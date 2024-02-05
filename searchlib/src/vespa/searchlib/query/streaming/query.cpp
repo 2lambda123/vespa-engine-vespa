@@ -31,7 +31,7 @@ QueryConnector::addChild(QueryNode::UP child) {
 QueryConnector::~QueryConnector() = default;
 
 const HitList &
-QueryConnector::evaluateHits(HitList & hl) const
+QueryConnector::evaluateHits(HitList & hl)
 {
     if (evaluate()) {
         hl.emplace_back(0, 0, 1, 1);
@@ -121,17 +121,17 @@ QueryConnector::create(ParseItem::ItemType type)
 }
 
 bool
-TrueNode::evaluate() const
+TrueNode::evaluate()
 {
     return true;
 }
 
-bool FalseNode::evaluate() const {
+bool FalseNode::evaluate() {
     return false;
 }
 
 bool
-AndQueryNode::evaluate() const
+AndQueryNode::evaluate()
 {
     for (const auto & qn : getChildren()) {
         if ( ! qn->evaluate() ) return false;
@@ -140,7 +140,7 @@ AndQueryNode::evaluate() const
 }
 
 bool
-AndNotQueryNode::evaluate() const {
+AndNotQueryNode::evaluate() {
     if (getChildren().empty()) return true;
     auto it = getChildren().begin();
     auto mt = getChildren().end();
@@ -154,7 +154,7 @@ AndNotQueryNode::evaluate() const {
 }
 
 bool
-OrQueryNode::evaluate() const {
+OrQueryNode::evaluate() {
     for (const auto & qn : getChildren()) {
         if (qn->evaluate()) return true;
     }
@@ -162,7 +162,7 @@ OrQueryNode::evaluate() const {
 }
 
 bool
-RankWithQueryNode::evaluate() const {
+RankWithQueryNode::evaluate() {
     bool first = true;
     bool firstOk = false;
     for (const auto & qn : getChildren()) {
@@ -175,7 +175,7 @@ RankWithQueryNode::evaluate() const {
 }
 
 bool
-EquivQueryNode::evaluate() const
+EquivQueryNode::evaluate()
 {
     return OrQueryNode::evaluate();
 }
@@ -189,7 +189,7 @@ Query::Query(const QueryNodeResultFactory & factory, vespalib::stringref queryRe
 }
 
 bool
-Query::evaluate() const {
+Query::evaluate() {
     return valid() && _root->evaluate();
 }
 
