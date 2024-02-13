@@ -143,7 +143,6 @@ public class FederationSearcher extends ForkingSearcher {
                     }
                 }
             }
-            builder.useTargetByDefault(superGroup);
         }
 
         return builder.build();
