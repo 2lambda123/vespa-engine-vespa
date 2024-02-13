@@ -28,38 +28,26 @@ public class FederationSearcher extends Searcher<FederationSearcherModel> implem
     private final Optional<Component> targetSelector;
 
     /**
-     * Generates config for a single search chain contained in a target.
-     */
-    private static final class SearchChainConfig {
-
-        private final SearchChain searchChain;
-        final ComponentId providerId;
-        final FederationOptions targetOptions;
-        final List<String> documentTypes;
-
-        SearchChainConfig(SearchChain searchChain, ComponentId providerId,
-                          FederationOptions targetOptions, List<String> documentTypes) {
-            this.searchChain = searchChain;
-            this.providerId = providerId;
-            this.targetOptions = targetOptions;
-            this.documentTypes = documentTypes;
-        }
+         * Generates config for a single search chain contained in a target.
+         */
+        private record SearchChainConfig(SearchChain searchChain, ComponentId providerId, FederationOptions targetOptions,
+                                         List<String> documentTypes) {
 
         FederationConfig.Target.SearchChain.Builder getSearchChainConfig() {
-            FederationConfig.Target.SearchChain.Builder sB = new FederationConfig.Target.SearchChain.Builder();
-            FederationOptions resolvedOptions = targetOptions.inherit(searchChain.federationOptions());
-            sB.
-                searchChainId(searchChain.getGlobalComponentId().stringValue()).
-                timeoutMillis(resolvedOptions.getTimeoutInMilliseconds()).
-                requestTimeoutMillis(resolvedOptions.getRequestTimeoutInMilliseconds()).
-                optional(resolvedOptions.getOptional()).
-                useByDefault(resolvedOptions.getUseByDefault()).
-                documentTypes(documentTypes);
-            if (providerId != null)
-                sB.providerId(providerId.stringValue());
-            return sB;
+                FederationConfig.Target.SearchChain.Builder sB = new FederationConfig.Target.SearchChain.Builder();
+                FederationOptions resolvedOptions = targetOptions.inherit(searchChain.federationOptions());
+                sB.
+                        searchChainId(searchChain.getGlobalComponentId().stringValue()).
+                        timeoutMillis(resolvedOptions.getTimeoutInMilliseconds()).
+                        requestTimeoutMillis(resolvedOptions.getRequestTimeoutInMilliseconds()).
+                        optional(resolvedOptions.getOptional()).
+                        useByDefault(resolvedOptions.getUseByDefault()).
+                        documentTypes(documentTypes);
+                if (providerId != null)
+                    sB.providerId(providerId.stringValue());
+                return sB;
+            }
         }
-    }
 
     /**
      * One or more search chains that are handled as a single group,
@@ -137,40 +125,37 @@ public class FederationSearcher extends Searcher<FederationSearcherModel> implem
         }
     }
 
-    private static class TargetResolver {
+    private record TargetResolver(ComponentRegistry<SearchChain> searchChainRegistry,
+                                  SourceGroupRegistry sourceGroupRegistry) {
 
-        final ComponentRegistry<SearchChain> searchChainRegistry;
-        final SourceGroupRegistry sourceGroupRegistry;
+            /**
+             * Returns true if searchChain.id newer than sourceGroup.id
+             */
+            private boolean newerVersion(SearchChain searchChain, SourceGroup sourceGroup) {
+                if (searchChain == null || sourceGroup == null) return false;
+                return newerVersion(searchChain.getComponentId(), sourceGroup.getComponentId());
+            }
 
-        /** Returns true if searchChain.id newer than sourceGroup.id */
-        private boolean newerVersion(SearchChain searchChain, SourceGroup sourceGroup) {
-            if (searchChain == null || sourceGroup == null) return false;
-            return newerVersion(searchChain.getComponentId(), sourceGroup.getComponentId());
-        }
+            /**
+             * Returns true if a newer than b
+             */
+            private boolean newerVersion(ComponentId a, ComponentId b) {
+                return a.compareTo(b) > 0;
+            }
 
-        /** Returns true if a newer than b */
-        private boolean newerVersion(ComponentId a, ComponentId b) {
-            return a.compareTo(b) > 0;
-        }
+        Target resolve(TargetSpec specification) {
+                SearchChain searchChain = searchChainRegistry.getComponent(specification.sourceSpec);
+                SourceGroup sourceGroup = sourceGroupRegistry.getComponent(specification.sourceSpec);
 
-        TargetResolver(ComponentRegistry<SearchChain> searchChainRegistry, SourceGroupRegistry sourceGroupRegistry) {
-            this.searchChainRegistry = searchChainRegistry;
-            this.sourceGroupRegistry = sourceGroupRegistry;
-        }
-
-        Target resolve(FederationSearcherModel.TargetSpec specification) {
-            SearchChain searchChain = searchChainRegistry.getComponent(specification.sourceSpec);
-            SourceGroup sourceGroup = sourceGroupRegistry.getComponent(specification.sourceSpec);
-
-            if (searchChain == null && sourceGroup == null) {
-                return null;
-            } else if (sourceGroup == null || newerVersion(searchChain, sourceGroup)) {
-                return new SearchChainTarget(searchChain, specification.federationOptions);
-            } else {
-                return new SourceGroupTarget(sourceGroup, specification.federationOptions);
+                if (searchChain == null && sourceGroup == null) {
+                    return null;
+                } else if (sourceGroup == null || newerVersion(searchChain, sourceGroup)) {
+                    return new SearchChainTarget(searchChain, specification.federationOptions);
+                } else {
+                    return new SourceGroupTarget(sourceGroup, specification.federationOptions);
+                }
             }
         }
-    }
 
     private final Map<ComponentId, Target> resolvedTargets = new LinkedHashMap<>();
 
@@ -178,7 +163,7 @@ public class FederationSearcher extends Searcher<FederationSearcherModel> implem
         super(searcherModel);
         this.targetSelector = targetSelector;
 
-        targetSelector.ifPresent(selector -> addChild(selector));
+        targetSelector.ifPresent(this::addChild);
     }
 
     @Override

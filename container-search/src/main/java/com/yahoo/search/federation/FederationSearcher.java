@@ -52,6 +52,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.yahoo.collections.CollectionUtil.first;
@@ -108,6 +109,11 @@ public class FederationSearcher extends ForkingSearcher {
     private static SearchChainResolver createResolver(FederationConfig config) {
         SearchChainResolver.Builder builder = new SearchChainResolver.Builder();
 
+        Set<String> superGroups = config.target().stream()
+                .filter(target -> target.id().contains("."))
+                .map(target -> target.id())
+                .collect(Collectors.toUnmodifiableSet());
+
         for (FederationConfig.Target target : config.target()) {
             boolean isDefaultProviderForSource = true;
 
@@ -115,7 +121,7 @@ public class FederationSearcher extends ForkingSearcher {
                 if (searchChain.providerId() == null || searchChain.providerId().isEmpty()) {
                     addSearchChain(builder, target, searchChain);
                 } else {
-                    addSourceForProvider(builder, target, searchChain, isDefaultProviderForSource);
+                    addSourceForProvider(builder, target.id(), searchChain, isDefaultProviderForSource);
                     isDefaultProviderForSource = false;
                 }
             }
@@ -123,6 +129,17 @@ public class FederationSearcher extends ForkingSearcher {
             // Allow source groups to use by default.
             if (target.useByDefault())
                 builder.useTargetByDefault(target.id());
+        }
+        for (String superGroup : superGroups) {
+            String prefix = superGroup + '.';
+            for (FederationConfig.Target target : config.target()) {
+                if (target.id().startsWith(prefix)) {
+                    for (FederationConfig.Target.SearchChain searchChain : target.searchChain()) {
+                        addSourceForProvider(builder, superGroup, searchChain, false);
+                    }
+                }
+            }
+            builder.useTargetByDefault(superGroup);
         }
 
         return builder.build();
@@ -137,10 +154,10 @@ public class FederationSearcher extends ForkingSearcher {
                                federationOptions(searchChain), searchChain.documentTypes());
     }
 
-    private static void addSourceForProvider(SearchChainResolver.Builder builder, FederationConfig.Target target,
+    private static void addSourceForProvider(SearchChainResolver.Builder builder, String target,
                                              FederationConfig.Target.SearchChain searchChain, boolean isDefaultProvider) {
         builder.addSourceForProvider(
-                ComponentId.fromString(target.id()),
+                ComponentId.fromString(target),
                 ComponentId.fromString(searchChain.providerId()),
                 ComponentId.fromString(searchChain.searchChainId()),
                 isDefaultProvider, federationOptions(searchChain),
@@ -578,11 +595,7 @@ public class FederationSearcher extends ForkingSearcher {
 
         /** Returns a result to fill for a query and chain, by creating it if necessary */
         public Result get(Chain<Searcher> chain, Query query) {
-            Map<Query,Result> resultsToFillForAChain = resultsToFill.get(chain);
-            if (resultsToFillForAChain == null) {
-                resultsToFillForAChain = new IdentityHashMap<>();
-                resultsToFill.put(chain,resultsToFillForAChain);
-            }
+            Map<Query, Result> resultsToFillForAChain = resultsToFill.computeIfAbsent(chain, k -> new IdentityHashMap<>());
 
             Result resultsToFillForAChainAndQuery = resultsToFillForAChain.get(query);
             if (resultsToFillForAChainAndQuery == null) {
@@ -686,34 +699,26 @@ public class FederationSearcher extends ForkingSearcher {
 
     }
 
-    private static class Window {
-        
-        private final int hits;
-        private final int offset;
-        
-        public Window(int hits, int offset) {
-            this.hits = hits;
-            this.offset = offset;
-        }
+    private record Window(int hits, int offset) {
 
         public Integer get(CompoundName parameterName) {
-            if (parameterName.equals(Query.HITS)) return hits;
-            if (parameterName.equals(Query.OFFSET)) return offset;
-            return null;
-        }
-        
+                if (parameterName.equals(Query.HITS)) return hits;
+                if (parameterName.equals(Query.OFFSET)) return offset;
+                return null;
+            }
+
         public static Window from(Query query) {
-            return new Window(query.getHits(), query.getOffset());
+                return new Window(query.getHits(), query.getOffset());
+            }
+
+
+            public static Window from(Collection<Target> targets, Query query) {
+                if (targets.size() == 1) // preserve requested top-level offsets
+                    return Window.from(query);
+                else // request from offset 0 to enable correct upstream blending into a single top-level hit list
+                    return new Window(query.getHits() + query.getOffset(), 0);
+            }
+
         }
-
-
-        public static Window from(Collection<Target> targets, Query query) {
-            if (targets.size() == 1) // preserve requested top-level offsets
-                return Window.from(query);
-            else // request from offset 0 to enable correct upstream blending into a single top-level hit list
-                return new Window(query.getHits() + query.getOffset(), 0);
-        }
-
-    }
 
 }
