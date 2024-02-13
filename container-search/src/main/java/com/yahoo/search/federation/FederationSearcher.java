@@ -114,6 +114,8 @@ public class FederationSearcher extends ForkingSearcher {
                 .map(target -> target.id())
                 .collect(Collectors.toUnmodifiableSet());
 
+        log.warning("Super groups = " + superGroups);
+
         for (FederationConfig.Target target : config.target()) {
             boolean isDefaultProviderForSource = true;
 
