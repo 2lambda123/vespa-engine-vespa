@@ -123,7 +123,7 @@ public class FederationSearcher extends ForkingSearcher {
                 if (searchChain.providerId() == null || searchChain.providerId().isEmpty()) {
                     addSearchChain(builder, target, searchChain);
                 } else {
-                    addSourceForProvider(builder, target.id(), searchChain, isDefaultProviderForSource);
+                    addSourceForProvider(builder, target.id(), searchChain.providerId(), searchChain, isDefaultProviderForSource);
                     isDefaultProviderForSource = false;
                 }
             }
@@ -137,7 +137,7 @@ public class FederationSearcher extends ForkingSearcher {
             for (FederationConfig.Target target : config.target()) {
                 if (target.id().startsWith(prefix)) {
                     for (FederationConfig.Target.SearchChain searchChain : target.searchChain()) {
-                        addSourceForProvider(builder, superGroup, searchChain, false);
+                        addSourceForProvider(builder, superGroup, target.id(), searchChain, false);
                     }
                 }
             }
@@ -156,11 +156,11 @@ public class FederationSearcher extends ForkingSearcher {
                                federationOptions(searchChain), searchChain.documentTypes());
     }
 
-    private static void addSourceForProvider(SearchChainResolver.Builder builder, String target,
+    private static void addSourceForProvider(SearchChainResolver.Builder builder, String target, String providerId,
                                              FederationConfig.Target.SearchChain searchChain, boolean isDefaultProvider) {
         builder.addSourceForProvider(
                 ComponentId.fromString(target),
-                ComponentId.fromString(searchChain.providerId()),
+                ComponentId.fromString(providerId),
                 ComponentId.fromString(searchChain.searchChainId()),
                 isDefaultProvider, federationOptions(searchChain),
                 searchChain.documentTypes());
