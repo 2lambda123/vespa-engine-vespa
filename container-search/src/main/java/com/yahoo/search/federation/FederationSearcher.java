@@ -134,10 +134,12 @@ public class FederationSearcher extends ForkingSearcher {
         }
         for (String superGroup : superGroups) {
             String prefix = superGroup + '.';
+            boolean isDefaultProviderForSource = true;
             for (FederationConfig.Target target : config.target()) {
                 if (target.id().startsWith(prefix)) {
                     for (FederationConfig.Target.SearchChain searchChain : target.searchChain()) {
-                        addSourceForProvider(builder, superGroup, target.id(), searchChain, false);
+                        addSourceForProvider(builder, superGroup, target.id(), searchChain, isDefaultProviderForSource);
+                        isDefaultProviderForSource = false;
                     }
                 }
             }
