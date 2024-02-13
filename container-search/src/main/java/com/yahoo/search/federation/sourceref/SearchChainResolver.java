@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 /**
  * Resolves (source, provider) component specifications to a search chain invocation spec.
@@ -40,6 +41,7 @@ import java.util.TreeSet;
  * @author Tony Vaagenes
  */
 public class SearchChainResolver {
+    private static final Logger log = Logger.getLogger(SearchChainResolver.class.getName());
 
     private final ComponentRegistry<Target> targets;
     private final SortedSet<Target> defaultTargets;
@@ -142,6 +144,7 @@ public class SearchChainResolver {
     private Target resolveTarget(ComponentSpecification sourceRef) throws UnresolvedSearchChainException {
         Target target = targets.getComponent(sourceRef);
         if (target == null) {
+            log.warning("sourceRef=" + sourceRef + "Not found in" + targets.allComponentsById());
             throw UnresolvedSourceRefException.createForMissingSourceRef(sourceRef);
         }
         return target;

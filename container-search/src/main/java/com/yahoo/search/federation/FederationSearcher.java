@@ -294,7 +294,7 @@ public class FederationSearcher extends ForkingSearcher {
         return descriptions;
     }
 
-    private Set<String> getMessagesSet(List<UnresolvedSearchChainException> unresolvedSearchChainExceptions) {
+    private static Set<String> getMessagesSet(List<UnresolvedSearchChainException> unresolvedSearchChainExceptions) {
         Set<String> messages = new LinkedHashSet<>();
         for (UnresolvedSearchChainException exception : unresolvedSearchChainExceptions) {
             messages.add(exception.getMessage());
