@@ -111,7 +111,7 @@ public class FederationSearcher extends ForkingSearcher {
 
         Set<String> superGroups = config.target().stream()
                 .filter(target -> target.id().contains("."))
-                .map(target -> target.id())
+                .map(target -> target.id().substring(0, target.id().indexOf('.')))
                 .collect(Collectors.toUnmodifiableSet());
 
         log.warning("Super groups = " + superGroups);
