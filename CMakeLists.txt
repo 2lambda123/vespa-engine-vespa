@@ -1,18 +1,15 @@
-# Copyright Vespa.ai. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
-# @author Vegard Sjonfjell
-# @author Eirik Nygaard
+# Copyright Vespa.ai. Licensed under the terms of the Apache 2.0 license. See
+# LICENSE in the project root. @author Vegard Sjonfjell @author Eirik Nygaard
 # @author Arnstein Ressem
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
 include(functions.cmake)
-list(APPEND CMAKE_MODULE_PATH
-     "$ENV{HOME}/share/cmake/Modules"
-     "/opt/vespa-deps/share/cmake/Modules"
-     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
-)
+list(APPEND CMAKE_MODULE_PATH "$ENV{HOME}/share/cmake/Modules"
+     "/opt/vespa-deps/share/cmake/Modules" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(default_build_settings.cmake)
 vespa_detect_build_platform()
-message("-- Vespa build platform is ${VESPA_OS_DISTRO} ${VESPA_OS_DISTRO_VERSION}")
+message(
+  "-- Vespa build platform is ${VESPA_OS_DISTRO} ${VESPA_OS_DISTRO_VERSION}")
 vespa_use_default_cxx_compiler()
 vespa_use_default_java_home()
 
@@ -25,8 +22,8 @@ vespa_use_default_vespa_group()
 vespa_use_default_vespa_deps_prefix()
 vespa_use_default_cmake_prefix_path()
 
-SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
-SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 
 find_package(Threads REQUIRED)
 
@@ -42,8 +39,8 @@ message(STATUS "LLVM_LIBRARY_DIR is ${LLVM_LIBRARY_DIR}")
 vespa_use_default_build_settings()
 
 # allows import of project in CLion on OSX
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 endif()
 
 # TODO: Move this to where it's actually needed
@@ -58,9 +55,11 @@ include(build_settings.cmake)
 # Enable CTest unit testing
 enable_testing()
 
-# Export vespa cmake config, to be used by other cmake project depending on vespa
+# Export vespa cmake config, to be used by other cmake project depending on
+# vespa
 set(VESPA_CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/cmake/vespa)
-string(REGEX REPLACE "-DV_TAG_COMPONENT=\\\\\"(.*)\\\\\"" "\\1" VESPA_VERSION ${V_TAG_COMPONENT})
+string(REGEX REPLACE "-DV_TAG_COMPONENT=\\\\\"(.*)\\\\\"" "\\1" VESPA_VERSION
+                     ${V_TAG_COMPONENT})
 message("-- VESPA_VERSION is ${VESPA_VERSION}")
 
 include(CMakePackageConfigHelpers)
@@ -68,25 +67,26 @@ function(vespa_configure_exported_config)
   set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
   set(INSTALL_PREFIX_DIR ${CMAKE_INSTALL_PREFIX})
   set(CMAKECONFIG_DIR ${VESPA_CMAKECONFIG_INSTALL_DIR})
-  configure_package_config_file(cmake/vespaConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/vespaConfig.cmake
+  configure_package_config_file(
+    cmake/vespaConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/vespaConfig.cmake
     INSTALL_DESTINATION ${VESPA_CMAKECONFIG_INSTALL_DIR}
     PATH_VARS INCLUDE_INSTALL_DIR INSTALL_PREFIX_DIR CMAKECONFIG_DIR)
 endfunction()
 function(vespa_configure_exported_configversion)
-  write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/vespaConfigVersion.cmake
+  write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/vespaConfigVersion.cmake
     VERSION ${VESPA_VERSION}
     COMPATIBILITY AnyNewerVersion)
 endfunction()
 vespa_configure_exported_config()
 vespa_configure_exported_configversion()
-install(FILES
-  functions.cmake
-  build_settings.cmake
-  default_build_settings.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/vespaConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/vespaConfigVersion.cmake
-  cmake/vespaTargets.cmake
+install(
+  FILES functions.cmake
+        build_settings.cmake
+        default_build_settings.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/vespaConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/vespaConfigVersion.cmake
+        cmake/vespaTargets.cmake
   DESTINATION ${VESPA_CMAKECONFIG_INSTALL_DIR})
 # End of exporting vespa cmake config
 
@@ -196,16 +196,20 @@ add_subdirectory(zookeeper-server)
 # Add any extra projects
 add_extra_projects()
 
-# Create module targets with name ${MODULE}+module depending on every target defined within that module
+# Create module targets with name ${MODULE}+module depending on every target
+# defined within that module
 __create_module_targets(TARGETS "module")
 
-# Create module targets with name ${MODULE}+test depending on every test target defined within that module
+# Create module targets with name ${MODULE}+test depending on every test target
+# defined within that module
 __create_module_targets(TEST_TARGETS "test")
 
-# Create module targets with name ${MODULE}+source depending on every source target defined within that module
+# Create module targets with name ${MODULE}+source depending on every source
+# target defined within that module
 __create_module_targets(SOURCE_TARGETS "source")
 
-# Create module targets with name ${MODULE}+object depending on every object target defined within that module
+# Create module targets with name ${MODULE}+object depending on every object
+# target defined within that module
 __create_module_targets(OBJECT_TARGETS "object")
 
 # Create module source dependencies
