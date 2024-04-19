@@ -57,8 +57,8 @@ void my_generate(const std::string &name,
                  GeneratorContext &context)
 {
     if (file.dependency_count() > 0
-        || file.public_dependency_count() > 0
-        || file.weak_dependency_count() > 0)
+            || file.public_dependency_count() > 0
+            || file.weak_dependency_count() > 0)
     {
         std::string message = "Importing dependencies not supported";
         throw message;
@@ -84,7 +84,7 @@ void my_generate(const std::string &name,
     write_line(csi_cpp, "#include \"" + filename_csi_h + "\"");
 }
 
-bool MyGen::Generate(const FileDescriptor * file, const std::string & parameter, 
+bool MyGen::Generate(const FileDescriptor * file, const std::string & parameter,
                      GeneratorContext * generator_context, std::string * error) const
 {
     std::string name = "[unknown]";
