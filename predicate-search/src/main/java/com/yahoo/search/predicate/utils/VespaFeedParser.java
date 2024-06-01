@@ -2,6 +2,7 @@
 package com.yahoo.search.predicate.utils;
 
 import com.yahoo.document.predicate.Predicate;
+import io.github.pixee.security.BoundedLineReader;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -20,18 +21,18 @@ public class VespaFeedParser {
     public static int parseDocuments(String feedFile, int maxDocuments, Consumer<Predicate> consumer) throws IOException {
         int documentCount = 0;
         try (BufferedReader reader = new BufferedReader(new FileReader(feedFile), 8 * 1024)) {
-            reader.readLine();
-            reader.readLine(); // Skip to start of first document
-            String line = reader.readLine();
+            BoundedLineReader.readLine(reader, 5_000_000);
+            BoundedLineReader.readLine(reader, 5_000_000); // Skip to start of first document
+            String line = BoundedLineReader.readLine(reader, 5_000_000);
             while (!line.startsWith("</vespafeed>") && documentCount < maxDocuments) {
                 while (!line.startsWith("<boolean>")) {
-                    line = reader.readLine();
+                    line = BoundedLineReader.readLine(reader, 5_000_000);
                 }
                 Predicate predicate = Predicate.fromString(extractBooleanExpression(line));
                 consumer.accept(predicate);
                 ++documentCount;
                 while (!line.startsWith("<document") && !line.startsWith("</vespafeed>")) {
-                    line = reader.readLine();
+                    line = BoundedLineReader.readLine(reader, 5_000_000);
                 }
             }
         }
